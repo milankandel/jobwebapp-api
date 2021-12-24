@@ -1,5 +1,7 @@
 const Job=require('../Models/job')
+const geocoder=require('../utils/Geocoder')
 const slugify=require('slugify')
+
 
 
 exports.fetchAllJobs=async (req,res,next)=>{
@@ -33,6 +35,20 @@ exports.deleteAllJobs=async(req,res,next)=>{
     })
 }
 
+
+exports.findJobByRadiusAndDistance=async(req,res,next)=>{
+    const {zipcode,distance}=req.params;
+    const radius=distance/3963;
+    const datas=await geocoder.geocode(zipcode)
+    const {longitude,latitude}=datas[0]
+    const jobs=await Job.find({location:{$geoWithin:{$centerSphere:[[longitude,latitude],radius]}}})
+    res.status(200).json({
+        success:true,
+        result:jobs.length,
+        data:jobs
+    })
+
+}
 
 exports.deleteById=async(req,res,next)=>{
     const id=req.params.id;
