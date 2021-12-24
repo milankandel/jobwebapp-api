@@ -36,7 +36,9 @@ exports.deleteAllJobs=async(req,res,next)=>{
 
 exports.deleteById=async(req,res,next)=>{
     const id=req.params.id;
+    const job=await Job.findByIdAndDelete(id)
     res.status(200).json({
-        id
+        success:true,
+        message: `Job with ${id} deleted`
     })
 }
