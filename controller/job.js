@@ -104,3 +104,34 @@ exports.getJobById=async(req,res,next)=>{
         data:job
     })
 }
+
+exports.getJobStats=async(req,res,next)=>{
+    const stat=await Job.aggregate([{$match:{$text:{$search:"\""+req.params.topic+"\""}}},
+    {
+        $group:{_id:null,
+            totalJobs:{$sum:1},
+            minSalary:{$min:'$salary'},
+            maxSalary:{$max:'$salary'},
+            avgSalary:{$avg:'$salary'}
+        }
+    }
+    
+    ])
+
+    if(stat.length===0){
+        return res.status(404).json({
+            success:true,
+            message:`Result not found for ${req.params.topic}`
+        })
+    }
+
+    res.status(200).json({
+        success:true,
+        data:stat
+    })
+
+
+    
+    
+
+}
