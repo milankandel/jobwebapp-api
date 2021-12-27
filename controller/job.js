@@ -1,10 +1,12 @@
 const Job=require('../Models/job')
 const geocoder=require('../utils/Geocoder')
 const slugify=require('slugify')
+const errorHandler = require('../ErrorHandler/errorHandler')
+const asyncErrorHandler = require('../middleware/asyncErrorHandler')
 
 
 
-exports.fetchAllJobs=async (req,res,next)=>{
+exports.fetchAllJobs=asyncErrorHandler( async (req,res,next)=>{
    
     const jobs=await Job.find()
     res.status(200).json({
@@ -12,11 +14,11 @@ exports.fetchAllJobs=async (req,res,next)=>{
         data:jobs,
         result:jobs.length
     })
-}
+})
 
 
 
-exports.createJobs=async(req,res,next)=>{
+exports.createJobs=asyncErrorHandler(async(req,res,next)=>{
     const job=await Job.create(req.body)
     res.status(200).json({
         success:true,
@@ -24,19 +26,19 @@ exports.createJobs=async(req,res,next)=>{
         message:'Job created'
     })
     
-}
+})
 
 
-exports.deleteAllJobs=async(req,res,next)=>{
+exports.deleteAllJobs=asyncErrorHandler(async(req,res,next)=>{
     const job=await Job.deleteMany()
     res.status(200).json({
         success:true,
         message:'All job deleted'
     })
-}
+})
 
 
-exports.findJobByRadiusAndDistance=async(req,res,next)=>{
+exports.findJobByRadiusAndDistance=asyncErrorHandler(async(req,res,next)=>{
     const {zipcode,distance}=req.params;
     const radius=distance/3963;
     const datas=await geocoder.geocode(zipcode)
@@ -48,18 +50,15 @@ exports.findJobByRadiusAndDistance=async(req,res,next)=>{
         data:jobs
     })
 
-}
+})
 
 
-exports.findJobAndUpdate=async(req,res,next)=>{
+exports.findJobAndUpdate=asyncErrorHandler(async(req,res,next)=>{
     const id=req.params.id;
     let job=await Job.findById(id)
     console.log(job)
     if(!job){
-        return res.status(404).json({
-            success:true,
-            message:'Job with that id doesnot exist'
-        })
+        return next(new errorHandler('Job not found',404))
       
     }
     const updatedJob=await Job.findByIdAndUpdate(id,req.body,{
@@ -72,9 +71,9 @@ exports.findJobAndUpdate=async(req,res,next)=>{
         data:updatedJob,
         message:'Job updated'
     })
-}
+})
 
-exports.deleteById=async(req,res,next)=>{
+exports.deleteById=asyncErrorHandler(async(req,res,next)=>{
     const id=req.params.id;
     const data=await Job.findById(id)
     if(!data){
@@ -88,10 +87,10 @@ exports.deleteById=async(req,res,next)=>{
         success:true,
         message: `Job with ${id} deleted`
     })
-}
+})
 
 
-exports.getJobById=async(req,res,next)=>{
+exports.getJobById=asyncErrorHandler(async(req,res,next)=>{
     const job=await Job.find({$and:[{_id:req.params.id},{slug:req.params.slug}]})
     if(!job || job.length==0){
         return res.status(404).json({
@@ -103,9 +102,9 @@ exports.getJobById=async(req,res,next)=>{
         success:true,
         data:job
     })
-}
+})
 
-exports.getJobStats=async(req,res,next)=>{
+exports.getJobStats=asyncErrorHandler(async(req,res,next)=>{
     const stat=await Job.aggregate([{$match:{$text:{$search:"\""+req.params.topic+"\""}}},
     {
         $group:{_id:null,
@@ -134,4 +133,4 @@ exports.getJobStats=async(req,res,next)=>{
     
     
 
-}
+})
