@@ -26,6 +26,11 @@ module.exports=(err,req,res,next)=>{
             const message=Object.values(err.errors).map(value=>value.message)
             error=new errorHandler(message,400)
         } 
+
+        if(err.name===`JsonWebTokenError`){
+            const message=`Json web token invalid`
+            error=new errorHandler(message,500)
+        } 
         if(error.code===11000){
             Object.keys(error.keyValue).map(data=>{    
             const message=`Dublicate ${data}  entered`
