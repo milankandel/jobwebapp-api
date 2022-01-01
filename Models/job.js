@@ -3,7 +3,7 @@ const { default: slugify } = require('slugify')
 const validator =require('validator')
 const geocoder=require('../utils/Geocoder')
 
-const {Schema}=mongoose
+const {Schema,Types}=mongoose
 
 
 
@@ -94,6 +94,11 @@ const jobSchema=new Schema({
     lastDate:{
         type:Date,
         default:new Date().setDate(new Date().getDate()+7)
+    },
+    user:{
+      type:Schema.ObjectId,
+      ref:'User',
+      required:true
     },
     applicantApplied:{
         type:[Object],

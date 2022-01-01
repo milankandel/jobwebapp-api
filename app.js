@@ -2,6 +2,7 @@
 const express=require('express')
 const morgan=require('morgan')
 const dotenv=require('dotenv')
+const cookieParser=require('cookie-parser')
 const errorMiddleware = require('./middleware/Errors')
 const app=express()
 
@@ -18,6 +19,7 @@ dotenv.config({path:'./config/config.env'})
 createConnection()
 
 
+app.use(cookieParser())
 app.use(morgan('dev'))
 
 
@@ -32,10 +34,11 @@ app.use(express.urlencoded({ extended: true }));
 
 const jobRouter=require('./Routes/jobs')
 const errorHandler = require('./ErrorHandler/errorHandler')
+const authRouter = require('./Routes/auth')
 
 
 
-
+app.use(authRouter)
 app.use(jobRouter)
 app.all('*',(req,res,next)=>{
     next(new errorHandler('Route not found',404))

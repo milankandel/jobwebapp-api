@@ -26,9 +26,18 @@ module.exports=(err,req,res,next)=>{
             const message=Object.values(err.errors).map(value=>value.message)
             error=new errorHandler(message,400)
         } 
+        if(error.code===11000){
+            Object.keys(error.keyValue).map(data=>{    
+            const message=`Dublicate ${data}  entered`
+             error=new errorHandler(message,400)
+            
+            })
+          
+          
+        }
         res.status(err.statusCode).json({
             success:false,
-            errorMessage:error.message || `Internal server error`,
+            errorMessage:error.message|| `Internal server error`,
        
         })
     }
