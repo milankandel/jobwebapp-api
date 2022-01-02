@@ -8,9 +8,10 @@ const Apifilters = require("../utils/apiFilters");
 
 exports.fetchAllJobs = asyncErrorHandler(async (req, res, next) => {
   const apiFilters = (await new Apifilters(req.query).filter())
-
+  
   res.status(200).json({
-    apiFilters
+    apiFilters,
+    size:apiFilters.length
   });
 });
 
