@@ -35,10 +35,12 @@ app.use(express.urlencoded({ extended: true }));
 const jobRouter=require('./Routes/jobs')
 const errorHandler = require('./ErrorHandler/errorHandler')
 const authRouter = require('./Routes/auth')
+const userRouter = require('./Routes/user')
 
 
 
 app.use(authRouter)
+app.use(userRouter)
 app.use(jobRouter)
 app.all('*',(req,res,next)=>{
     next(new errorHandler('Route not found',404))
