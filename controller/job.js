@@ -15,6 +15,21 @@ exports.fetchAllJobs = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
+
+exports.paginateJobs=asyncErrorHandler(async (req,res,next)=>{
+  const page=parseInt(req.query.page ,10) || 1
+  const limit=parseInt(req.query.limit,10) || 10
+  const skipLimit=(page-1)*limit
+  const data=await Job.find().skip(skipLimit).limit(limit)
+  res.status(200).json({
+    success: true,
+    data: data,
+    message: "Job found",
+  });
+
+
+})
+
 exports.createJobs = asyncErrorHandler(async (req, res, next) => {
   req.body.user = req.user.id;
   const job = await Job.create(req.body);
