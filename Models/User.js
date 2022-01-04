@@ -37,6 +37,8 @@ const userSchema = new Schema({
       },
       resetPasswordToken:String,
       resetPasswordExpire:Date,
+},{
+  toJSON:{virtuals:true}
 })
 
 userSchema.pre('save',async function(next){
@@ -62,6 +64,13 @@ userSchema.methods={
     }
 }
 
+
+userSchema.virtual('jobPublished',{
+  ref:'Job',
+  localField:'_id',
+  foreignField:'user',
+  justOne:false
+})
 
 
 
