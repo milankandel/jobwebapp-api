@@ -4,6 +4,7 @@ const morgan=require('morgan')
 const dotenv=require('dotenv')
 const cookieParser=require('cookie-parser')
 const errorMiddleware = require('./middleware/Errors')
+const expressFileUploads=require('express-fileupload')
 const app=express()
 
 //database connection
@@ -38,10 +39,11 @@ const authRouter = require('./Routes/auth')
 const userRouter = require('./Routes/user')
 
 
-
+app.use(expressFileUploads())
 app.use(authRouter)
 app.use(userRouter)
 app.use(jobRouter)
+
 app.all('*',(req,res,next)=>{
     next(new errorHandler('Route not found',404))
 })

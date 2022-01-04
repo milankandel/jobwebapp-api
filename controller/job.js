@@ -3,8 +3,10 @@ const geocoder = require("../utils/Geocoder");
 const slugify = require("slugify");
 const errorHandler = require("../ErrorHandler/errorHandler");
 const asyncErrorHandler = require("../middleware/asyncErrorHandler");
+const path=require('path')
 
 const Apifilters = require("../utils/apiFilters");
+
 
 exports.fetchAllJobs = asyncErrorHandler(async (req, res, next) => {
   const apiFilters = (await new Apifilters(req.query).filter())
@@ -144,3 +146,73 @@ exports.getJobStats = asyncErrorHandler(async (req, res, next) => {
     data: stat,
   });
 });
+
+
+
+//localhost:8000/job/apply/:id/
+exports.applyJobs=asyncErrorHandler(async(req,res,next)=>{
+  console.log(req.user.id)
+  const id=req.params.id;
+  const job=await Job.findById(id).select('+applicantApplied')
+
+  if(!job){
+    return next(new errorHandler('Job not found',404))
+  }
+
+  job.applicantApplied.map(data=>{
+    console.log(data)
+    if(data.id===req.user.id){
+     return next(new errorHandler('Job already applied',500))
+    }
+  })
+
+  if(job.lastDate < new Date(Date.now())){
+    return next(new errorHandler('You are too late to apply to job',401))
+  }
+  
+  if(!req.files){
+    return next(new errorHandler('CV or resume is not uploaded',404))
+  }
+
+  const file=req.files.file
+  const supportedFiles= /.docx|.pdf/;
+  if(!supportedFiles.test(path.extname(file.name))){
+    return next(new errorHandler('Please upload supported file type',401))
+  }
+
+  if(file.size > process.env.UPLOAD_SIZE){
+    return next(new errorHandler('Please upload file less than 2MB',401))
+  }
+
+  file.name=`${req.user.name.replace('','_')}_${job._id}${path.parse(file.name).ext}`
+  file.mv(`${process.env.UPLOAD_PATH}/${file.name}`,async err=>{
+    if(err){
+      return next(new errorHandler('Resume upload failed',500))
+    }
+
+  
+
+    
+
+    await Job.findByIdAndUpdate(req.params.id,{$push:{
+      applicantApplied:{
+        id:req.user.id,
+        resume:file.name
+      }
+    }},{
+      new:true,
+      runValidators:true,
+      useFindAndModify:false
+
+    })
+    res.status(200).json({
+      success:true,
+      message:'Job applied successfully',
+      data:file.name
+    })
+
+  })
+
+  
+
+})
