@@ -40,6 +40,9 @@ const userRouter = require('./Routes/user')
 
 
 app.use(expressFileUploads())
+app.get("/",(req,res,next)=>{
+    res.send("Job API running")
+})
 app.use(authRouter)
 app.use(userRouter)
 app.use(jobRouter)
